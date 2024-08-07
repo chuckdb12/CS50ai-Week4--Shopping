@@ -75,18 +75,18 @@ def load_data(filename):
     # Dict of months of the year
 
     monthsToNum = {
-    "Jan": 1,
-    "Feb": 2,
-    "Mar": 3,
-    "Apr": 4,
-    "May": 5,
-    "June": 6,
-    "Jul": 7,
-    "Aug": 8,
-    "Sep": 9,
-    "Oct": 10,
-    "Nov": 11,
-    "Dec": 12
+    "Jan": 0,
+    "Feb": 1,
+    "Mar": 2,
+    "Apr": 3,
+    "May": 4,
+    "June": 5,
+    "Jul": 6,
+    "Aug": 7,
+    "Sep": 8,
+    "Oct": 9,
+    "Nov": 10,
+    "Dec": 11
 }
     
     # Simple dict linking BOOL string values to real Bool values
@@ -159,30 +159,30 @@ def evaluate(labels, predictions):
     sensitivity = 0.0
     specificity = 0.0
 
-    predictPos = 0.0
-    predictNeg = 0.0
+    truePos = 0.0
+    falseNeg = 0.0
+    trueNeg = 0.0
+    falsePos = 0.0
 
 
 
     for index, label in enumerate(labels):
         # True positive
-        if label == predictions[index] == 1:
-            sensitivity += 1.0
-            predictPos += 1.0
+        if label == 1 and predictions[index] == 1:
+            truePos += 1.0
         # False positive
         elif label == 0 and predictions[index] == 1:
-            predictPos += 1.0
+            falsePos += 1.0
         # True negative
-        elif label == predictions[index] == 0:
-            specificity += 1.0
-            predictNeg += 1.0
+        elif label == 0 and predictions[index] == 0:
+            trueNeg += 1.0
         # False negative
         elif label == 1 and predictions[index] == 0:
-            predictNeg += 1.0
+            falseNeg += 1.0
 
     # Calculate the sensitivity and specificity
-    sensitivity /= predictPos
-    specificity /= predictNeg
+    sensitivity = truePos / (truePos + falseNeg)
+    specificity = trueNeg / (trueNeg + falsePos)
 
     return (sensitivity, specificity)
 
