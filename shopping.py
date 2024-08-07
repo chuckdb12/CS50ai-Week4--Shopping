@@ -121,8 +121,11 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
+    # Create a new model instance with the K Neighbors Classifier algo implemented in the scikit-learn lib with one neighbor as specified
+    model = KNeighborsClassifier(n_neighbors=1)
 
-
+    # Train the model with the data set previously loaded
+    model.fit(evidence, labels)
 
 
 def evaluate(labels, predictions):
