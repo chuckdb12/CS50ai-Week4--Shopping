@@ -66,7 +66,7 @@ def load_data(filename):
 
     # List of values we want as int other than month and visitorType which require other considerations
 
-    intValues = ["Administrative", "Informational", "ProductRelated", "OperatingSystems", "Browser", "Region", "TrafficType", "Weekend"]
+    intValues = ["Administrative", "Informational", "ProductRelated", "OperatingSystems", "Browser", "Region", "TrafficType"]
 
     # List of values we want as floats
 
@@ -80,7 +80,7 @@ def load_data(filename):
     "Mar": 3,
     "Apr": 4,
     "May": 5,
-    "Jun": 6,
+    "June": 6,
     "Jul": 7,
     "Aug": 8,
     "Sep": 9,
@@ -88,29 +88,39 @@ def load_data(filename):
     "Nov": 11,
     "Dec": 12
 }
+    
+    # Simple dict linking BOOL string values to real Bool values
+
+    stringBoolToBool = {
+        "FALSE" : 0,
+        "TRUE" : 1
+    }
 
     with open(filename, newline='') as f:
 
         reader = csv.DictReader(f)
         for row in reader:
             # Create a current labels list to add to the labels list later
-            currentLabels = []
+            currentEvidences = []
             # iterate on each rows which is a dict item
             for header, value in row.items():
                 if header == "Revenue":
-                    labels.append(int(value))
+                    labels.append(stringBoolToBool[value])
                 elif header in intValues:
-                    evidence.append(int(value))
+                    currentEvidences.append(int(value))
                 elif header in floatValues:
-                    evidence.append(float(value))
+                    currentEvidences.append(float(value))
                 elif header == "Month":
-                    evidence.append(monthsToNum[value])
+                    currentEvidences.append(monthsToNum[value])
                 elif header == "VisitorType":
-                    evidence.append(1 if value == "Returning_Visitor" else 0)
-
-            labels.append(currentLabels)
+                    currentEvidences.append(1 if value == "Returning_Visitor" else 0)
+                elif header == "Weekend":
+                   currentEvidences.append(stringBoolToBool[value])
+            # We add the current evidences to the evidence list
+            evidence.append(currentEvidences)
+                    
             # Add the current evidence to evidence list 
-            
+    #print(evidence, labels)
     # return the tupple
     return (evidence, labels)
 
@@ -126,6 +136,8 @@ def train_model(evidence, labels):
 
     # Train the model with the data set previously loaded
     model.fit(evidence, labels)
+
+    return model
 
 
 def evaluate(labels, predictions):
@@ -143,7 +155,36 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+
+    sensitivity = 0.0
+    specificity = 0.0
+
+    predictPos = 0.0
+    predictNeg = 0.0
+
+
+
+    for index, label in enumerate(labels):
+        # True positive
+        if label == predictions[index] == 1:
+            sensitivity += 1.0
+            predictPos += 1.0
+        # False positive
+        elif label == 0 and predictions[index] == 1:
+            predictPos += 1.0
+        # True negative
+        elif label == predictions[index] == 0:
+            specificity += 1.0
+            predictNeg += 1.0
+        # False negative
+        elif label == 1 and predictions[index] == 0:
+            predictNeg += 1.0
+
+    # Calculate the sensitivity and specificity
+    sensitivity /= predictPos
+    specificity /= predictNeg
+
+    return (sensitivity, specificity)
 
 
 if __name__ == "__main__":
